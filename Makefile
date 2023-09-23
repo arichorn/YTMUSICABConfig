@@ -1,7 +1,8 @@
-TARGET := iphone:clang:latest:11.0
+TARGET := iphone:clang:latest:14.0
 INSTALL_TARGET_PROCESSES = YouTube
 ARCHS = arm64
 PACKAGE_VERSION = 1.5.0-2
+MIN_YOUTUBE_VERSION = 17.30.1
 
 include $(THEOS)/makefiles/common.mk
 
