@@ -386,7 +386,6 @@ static NSMutableArray <NSString *> *getBooleanMethods(Class clz) {
 }
 
 static void hookClass(NSObject *instance) {
-    if (!instance) [NSException raise:@"hookClass Invalid argument exception" format:@"Hooking the class of a non-existing instance"];
     Class instanceClass = [instance class];
     NSMutableArray <NSString *> *methods = getBooleanMethods(instanceClass);
     NSString *classKey = NSStringFromClass(instanceClass);
@@ -404,20 +403,9 @@ static void hookClass(NSObject *instance) {
 - (BOOL)application:(id)arg1 didFinishLaunchingWithOptions:(id)arg2 {
     defaults = [NSUserDefaults standardUserDefaults];
     if (tweakEnabled()) {
-        updateAllKeys();
-        YTGlobalConfig *globalConfig;
-        YTColdConfig *coldConfig;
-        YTHotConfig *hotConfig;
-        @try {
-            globalConfig = [self valueForKey:@"_globalConfig"];
-            coldConfig = [self valueForKey:@"_coldConfig"];
-            hotConfig = [self valueForKey:@"_hotConfig"];
-        } @catch (id ex) {
-            id settings = [self valueForKey:@"_settings"];
-            globalConfig = [settings valueForKey:@"_globalConfig"];
-            coldConfig = [settings valueForKey:@"_coldConfig"];
-            hotConfig = [settings valueForKey:@"_hotConfig"];
-        }
+        YTGlobalConfig *globalConfig = [self valueForKey:@"_globalConfig"];
+        YTColdConfig *coldConfig = [self valueForKey:@"_coldConfig"];
+        YTHotConfig *hotConfig = [self valueForKey:@"_hotConfig"];
         hookClass(globalConfig);
         hookClass(coldConfig);
         hookClass(hotConfig);
