@@ -66,19 +66,9 @@ static void hookClass(NSObject *instance) {
 - (BOOL)application:(id)arg1 didFinishLaunchingWithOptions:(id)arg2 {
     if (tweakEnabled()) {
         updateAllKeys();
-        YTGlobalConfig *globalConfig;
-        YTColdConfig *coldConfig;
-        YTHotConfig *hotConfig;
-        @try {
-            globalConfig = [self valueForKey:@"_globalConfig"];
-            coldConfig = [self valueForKey:@"_coldConfig"];
-            hotConfig = [self valueForKey:@"_hotConfig"];
-        } @catch (id ex) {
-            id settings = [self valueForKey:@"_settings"];
-            globalConfig = [settings valueForKey:@"_globalConfig"];
-            coldConfig = [settings valueForKey:@"_coldConfig"];
-            hotConfig = [settings valueForKey:@"_hotConfig"];
-        }
+        YTGlobalConfig *globalConfig = [self valueForKey:@"_globalConfig"];
+        YTColdConfig *coldConfig = [self valueForKey:@"_coldConfig"];
+        YTHotConfig *hotConfig = [self valueForKey:@"_hotConfig"];
         hookClass(globalConfig);
         hookClass(coldConfig);
         hookClass(hotConfig);
