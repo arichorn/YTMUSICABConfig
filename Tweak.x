@@ -6,6 +6,9 @@
 
 NSMutableDictionary <NSString *, NSMutableDictionary <NSString *, NSNumber *> *> *cache;
 
+static NSInteger appCloseCounter = 0;
+NSDate *lastCloseTime = nil;
+
 extern void SearchHook();
 
 extern BOOL tweakEnabled();
@@ -66,19 +69,9 @@ static void hookClass(NSObject *instance) {
 - (BOOL)application:(id)arg1 didFinishLaunchingWithOptions:(id)arg2 {
     if (tweakEnabled()) {
         updateAllKeys();
-        YTGlobalConfig *globalConfig;
-        YTColdConfig *coldConfig;
-        YTHotConfig *hotConfig;
-        @try {
-            globalConfig = [self valueForKey:@"_globalConfig"];
-            coldConfig = [self valueForKey:@"_coldConfig"];
-            hotConfig = [self valueForKey:@"_hotConfig"];
-        } @catch (id ex) {
-            id settings = [self valueForKey:@"_settings"];
-            globalConfig = [settings valueForKey:@"_globalConfig"];
-            coldConfig = [settings valueForKey:@"_coldConfig"];
-            hotConfig = [settings valueForKey:@"_hotConfig"];
-        }
+        YTGlobalConfig *globalConfig = [self valueForKey:@"_globalConfig"];
+        YTColdConfig *coldConfig = [self valueForKey:@"_coldConfig"];
+        YTHotConfig *hotConfig = [self valueForKey:@"_hotConfig"];
         hookClass(globalConfig);
         hookClass(coldConfig);
         hookClass(hotConfig);
@@ -89,6 +82,27 @@ static void hookClass(NSObject *instance) {
     return %orig;
 }
 
+- (void)applicationWillTerminate:(UIApplication *)application {
+    lastCloseTime = [NSDate date];
+    %orig;
+}
+
+- (BOOL)applicationDidFinishLaunching:(UIApplication *)application {
+    if (lastCloseTime && [[NSDate date] timeIntervalSinceDate:lastCloseTime] < 60) {
+        appCloseCounter++;
+        if (appCloseCounter >= 5) {
+            updateAllKeys();
+            for (NSString *key in allKeys) {
+                if ([key hasPrefix:Prefix])
+                    [defaults removeObjectForKey:key];
+            }
+            exit(0);
+        }
+    } else {
+        appCloseCounter = 0;
+    }
+    %orig;
+}
 %end
 
 %ctor {
