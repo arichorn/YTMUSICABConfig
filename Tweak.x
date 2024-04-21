@@ -6,6 +6,9 @@
 
 NSMutableDictionary <NSString *, NSMutableDictionary <NSString *, NSNumber *> *> *cache;
 
+static NSInteger appCloseCounter = 0;
+NSDate *lastCloseTime = nil;
+
 extern void SearchHook();
 
 extern BOOL tweakEnabled();
@@ -79,6 +82,27 @@ static void hookClass(NSObject *instance) {
     return %orig;
 }
 
+- (void)applicationWillTerminate:(UIApplication *)application {
+    lastCloseTime = [NSDate date];
+    %orig;
+}
+
+- (BOOL)applicationDidFinishLaunching:(UIApplication *)application {
+    if (lastCloseTime && [[NSDate date] timeIntervalSinceDate:lastCloseTime] < 60) {
+        appCloseCounter++;
+        if (appCloseCounter >= 5) {
+            updateAllKeys();
+            for (NSString *key in allKeys) {
+                if ([key hasPrefix:Prefix])
+                    [defaults removeObjectForKey:key];
+            }
+            exit(0);
+        }
+    } else {
+        appCloseCounter = 0;
+    }
+    %orig;
+}
 %end
 
 %ctor {
